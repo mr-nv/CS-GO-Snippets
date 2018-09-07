@@ -77,7 +77,49 @@ void run_fakelag(cmd, packet)
 	else if (type == 2 && !(local->flags() & onground)) {
 
 		if (local->getvelocity().z > 0) {
-			vel = local->getvelocity() * globals->interval_per_tick;
+			vel = local->getvelocity().z * globals->interval_per_tick;
+		}
+		else {
+			vel = 10;
+		}
+
+		maxvalue = maxvalue * 2.5;
+
+		if (maxinterval > 0.1) {
+			switch (
+				int(globals->time * maxinterval) % 2
+				)
+			{
+			case 0: {
+				if (packet)
+					factor = game::math.clamp(
+						static_cast<int>(
+							std::ceil(counter / vel)
+							), 1, maxvalue);
+			}
+					break;
+			case 1: return;
+				break;
+			}
+		}
+		else {
+			if (packet)
+				factor = game::math.clamp(
+					static_cast<int>(
+						std::ceil(counter / vel)
+						), 1, maxvalue
+				);
+		}
+
+		if (factor < 2)
+			factor = maxvalue;
+
+		packet = !(tick % factor);
+	}
+	else if (type == 3 && !(local->flags() & onground)) {
+
+		if (local->getvelocity().z < 0) {
+			vel = local->getvelocity().z * globals->interval_per_tick * (-1);
 		}
 		else {
 			vel = 10;
